@@ -4,6 +4,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import requests
 import scrapy
+import sys
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Globals
@@ -70,10 +71,8 @@ def download_list_of_raw_files_from_link_list(links: list[str]) -> list[str]:
     links_of_interest = [link for link in links if '2018' in link]
     local_files = list()
     for link in links_of_interest:
-        response = requests.get(link)
         filepath = os.path.join('data', '0_raw', os.path.basename(link))
-        with open(filepath, 'wb') as f:
-            f.write(response.content)
+        download_file(link, filepath)
         local_files.append(filepath)
 
     return local_files
@@ -94,3 +93,25 @@ def transform_zipped_files_into_parquet(files: list[str]) -> list[str]:
         parquet_files.append(pq_tgt_path)
 
     return parquet_files
+
+
+def download_file(link: str, file: str) -> str:
+    """https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads"""
+    with open(file, "wb") as f:
+        print(f"\nDownloading {file}")
+        response = requests.get(link, stream=True)
+        total_length = response.headers.get('content-length')
+
+        if total_length is None:  # no content length header
+            f.write(response.content)
+        else:
+            dl = 0
+            total_length = int(total_length)
+            for data in response.iter_content(chunk_size=4096):
+                dl += len(data)
+                f.write(data)
+                done = int(50 * dl / total_length)
+                sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                sys.stdout.flush()
+
+    return file
