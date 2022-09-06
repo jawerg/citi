@@ -18,6 +18,12 @@ resource "snowflake_table" "citibike_tripdata" {
   change_tracking     = false
 
   column {
+    name = "S3_OBJECT_NAME"
+    type = "VARCHAR(1024)"
+    nullable = false
+  }
+
+  column {
     name     = "PAYLOAD"
     type     = "VARIANT"
     nullable = false
