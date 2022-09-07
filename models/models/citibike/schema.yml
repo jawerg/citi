@@ -1,0 +1,10 @@
+
+version: 2
+
+sources:
+  - name: citibike
+    database: cb
+    schema: lz
+
+    tables:
+      - name: tripdata
