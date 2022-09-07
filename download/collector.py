@@ -5,6 +5,9 @@ import pyarrow.parquet as pq
 import requests
 import scrapy
 import sys
+import logging
+import boto3
+from botocore.exceptions import ClientError
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Globals
@@ -15,6 +18,9 @@ YEARS_OF_INTEREST = ['2018']
 
 # the index of the download page has been collected upfront.
 INDEX_FILE = 'data/download-page-index.html'
+
+S3_BUCKET = "snowflake-f28c31-3e92-9edc-c7f2-aab9-9a0c-889436"
+FOLDER = "wergstatt/citibike/tripdata"
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -29,6 +35,7 @@ class Collector:
 
         self.files = None
         self.pq_files = None
+        self.upload_responses = None
 
     def download_files(self):
         self.files = download_list_of_raw_files_from_link_list(self.links)
@@ -38,6 +45,9 @@ class Collector:
         self.pq_files = transform_zipped_files_into_parquet(self.files)
         return self
 
+    def upload_files(self):
+        self.upload_responses = upload_parquet_files_to_s3(self.pq_files)
+        return self
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Functionspace
@@ -115,3 +125,40 @@ def download_file(link: str, file: str) -> str:
                 sys.stdout.flush()
 
     return file
+
+
+def upload_parquet_files_to_s3(files: list[str]) -> list[requests.Response]:
+    responses, response = list(), False
+    for file in files:
+        response = upload_file(
+            file_name=file,
+            bucket=S3_BUCKET,
+            object_name=os.path.join(FOLDER, os.path.basename(file)),
+        )
+    responses.append(response)
+    return responses
+
+
+def upload_file(file_name, bucket, object_name=None):
+    """Upload a file to an S3 bucket
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+
+    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
+    """
+
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = os.path.basename(file_name)
+
+    # Upload the file
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.upload_file(file_name, bucket, object_name)
+        return response
+    except ClientError as e:
+        logging.error(e)
+        return False
