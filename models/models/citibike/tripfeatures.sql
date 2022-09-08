@@ -17,18 +17,16 @@ select
 
     -- computed entities
     year(starttime) - birth_year as "customer age",
+    haversine(
+        start_station_latitude,
+        start_station_longitude,
+        end_station_latitude,
+        end_station_longitude
+    )         as "trip distance in km",
     (
-            1000 * haversine(
-                start_station_latitude,
-                start_station_longitude,
-                end_station_latitude,
-                end_station_longitude
-            )
-        )::number(10, 0)         as "trip distance in m",
-    (
-            (trip_distance_in_m::float / 1000.0)
+            trip_distance_in_km
             / (tripduration::float / 60.0)
-        )::number(10, 0)         as "trip speed km/h"
+    )::number(10, 0)         as "trip speed km/h"
 from {{ ref('tripdata') }}
 where is_subscriber is not null
 
