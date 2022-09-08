@@ -19,6 +19,7 @@ select
     tripduration  / 3600.0       as tripduration_in_h,
 
     -- extract parts from start timestamp for categorical variables.
+    starttime::date              as trip_date,
     year(starttime)              as start_year,
     month(starttime)             as start_month,
     dayofweek(starttime)         as start_dow,

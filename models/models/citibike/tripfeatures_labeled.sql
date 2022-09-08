@@ -1,9 +1,17 @@
+{{
+  config(
+    materialized='table',
+    cluster_by=['is_subscriber', 'start_month', 'gender']
+  )
+}}
+
+
 select
-    decode(is_subscriber, 1, 'Subscriber', 0, 'Customer', null) as is_subscriber,
-    decode(gender, 0, 'Unknown', 1, 'Male', 2, 'Female', null) as gender,
-    tripduration_in_h,
+    decode(trip.is_subscriber, 1, 'Subscriber', 0, 'Customer', null) as is_subscriber,
+    decode(trip.gender, 0, 'Unknown', 1, 'Male', 2, 'Female', null) as gender,
+    trip.tripduration_in_h,
     decode(
-            start_dow,
+            trip.start_dow,
             0, '0 Sunday',
             1, '1 Monday',
             2, '2 Tuesday',
@@ -13,7 +21,7 @@ select
             6, '6 Saturday'
         ) as start_dow,
     decode(
-            start_month,
+            trip.start_month,
             1, '01 January',
             2, '02 February',
             3, '03 March',
@@ -27,8 +35,16 @@ select
             11, '11 November',
             12, '12 December'
         ) as start_month,
-    start_hour,
-    customer_age,
-    trip_distance_in_km,
-    trip_speed_kmh
-from {{ ref('tripfeatures') }}
+    trip.start_hour,
+    trip.customer_age,
+    trip.trip_distance_in_km,
+    trip.trip_speed_kmh,
+    wett.conditions,
+    wett.feelslike,
+    wett.humidity,
+    wett.moonphase,
+    wett.snowdepth,
+    wett.windspeed
+from {{ ref('tripfeatures') }}      as trip
+inner join {{ ref('wetterdaten') }} as wett
+    on trip.trip_date = wett.datetime
