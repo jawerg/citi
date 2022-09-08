@@ -16,7 +16,7 @@ select
 
     -- kept variables from the source dataset
     gender                       as gender,
-    tripduration                 as tripduration,
+    tripduration  / 60.0 / 60.0  as tripduration_in_h,
 
     -- extract parts from start timestamp for categorical variables.
     dayofweek(starttime)         as start_dow,
@@ -30,10 +30,7 @@ select
         end_station_latitude,
         end_station_longitude
     )         as trip_distance_in_km,
-    (
-        (1.0 * trip_distance_in_km)
-        / (tripduration::float / 60.0 / 60.0)
-    )         as trip_speed_kmh
+    trip_distance_in_km / tripduration_in_h / 60.0 as trip_speed_kmh
 from {{ ref('tripdata') }}
 where is_subscriber is not null
 

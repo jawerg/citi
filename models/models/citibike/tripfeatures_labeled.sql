@@ -1,7 +1,7 @@
 select
     decode(is_subscriber, 1, 'Subscriber', 0, 'Customer', null) as is_subscriber,
     decode(gender, 0, 'Unknown', 1, 'Male', 2, 'Female', null) as gender,
-    tripduration,
+    tripduration_in_h,
     decode(
             start_dow,
             0, 'So',
