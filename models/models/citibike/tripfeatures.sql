@@ -5,18 +5,18 @@ select
             'Subscriber', 1,
             'Customer', 0,
             null
-        )                        as is_subscriber,
+        )                        as "is subscriber",
 
     -- kept variables from the source dataset
     gender,
     tripduration,
 
     -- extract parts from start timestamp for categorical variables.
-    dayofweek(starttime)         as start_dow,
-    hour(starttime)              as start_hour,
+    dayofweek(starttime)         as "start dow",
+    hour(starttime)              as "start hour",
 
     -- computed entities
-    year(starttime) - birth_year as customer_age,
+    year(starttime) - birth_year as "customer age",
     (
             1000 * haversine(
                 start_station_latitude,
@@ -24,10 +24,10 @@ select
                 end_station_latitude,
                 end_station_longitude
             )
-        )::number(10, 0)         as trip_distance_in_m,
+        )::number(10, 0)         as "trip distance in m",
     (
-            trip_distance_in_m::float
-            / tripduration::float
-        )::number(10, 0)         as trip_speed_m_per_min
+            (trip_distance_in_m::float / 1000.0)
+            / (tripduration::float / 60.0)
+        )::number(10, 0)         as "trip speed km/h"
 from {{ ref('tripdata') }}
 where is_subscriber is not null
