@@ -8,8 +8,8 @@ select
         )                        as "is subscriber",
 
     -- kept variables from the source dataset
-    gender,
-    tripduration,
+    gender                       as "gender",
+    tripduration                 as "tripduration",
 
     -- extract parts from start timestamp for categorical variables.
     dayofweek(starttime)         as "start dow",
@@ -31,3 +31,9 @@ select
         )::number(10, 0)         as "trip speed km/h"
 from {{ ref('tripdata') }}
 where is_subscriber is not null
+
+-- Sort outputs by broad categories to improve compression of output file
+order by
+    "is subscriber",
+    "gender",
+    "customer age"
