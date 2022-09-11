@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Globals
-FRAC_SAMPLE = 0.3  # should be 1.0 in final version ;)
+FRAC_SAMPLE = 1.0  # should be 1.0 in final version ;)
 FRAC_TEST_DATA = 0.2  # ToDo: Find reasonable size.
 
 MODELS = [
@@ -37,9 +37,6 @@ def generate_dataset_from_feature_file(filepath: str) -> list[pd.DataFrame]:
     data = pd.read_parquet(filepath)
     data.columns = [col.lower().replace("_", " ") for col in data.columns]
     data = data.sample(frac=FRAC_SAMPLE)
-
-    # Remove Unknown gender rows, as those are always customers...
-    data = data[data["gender"] != "Unknown"]
 
     # Translate object datatypes into floats
     data["customer age"] = data["customer age"].astype(float)
