@@ -36,6 +36,7 @@ select
     trip_distance_in_km / tripduration_in_h as trip_speed_kmh
 from {{ ref('tripdata') }}
 where is_subscriber is not null
+  and not contains(s3_object_name, 'JC') -- Exclude JC Files for consistency.
 
 -- Sort outputs by broad categories to improve compression of output file
 order by

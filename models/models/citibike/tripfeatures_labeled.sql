@@ -39,10 +39,8 @@ select
     trip.customer_age,
     trip.trip_distance_in_km,
     trip.trip_speed_kmh,
-    wett.conditions,
     wett.feelslike,
     wett.humidity,
-    wett.moonphase,
     wett.snowdepth,
     wett.windspeed
 from {{ ref('tripfeatures') }}      as trip
