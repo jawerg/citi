@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Globals
 FRAC_SAMPLE = 1.0  # should be 1.0 in final version ;)
-FRAC_TEST_DATA = 0.2  # ToDo: Find reasonable size.
+FRAC_TEST_DATA = 0.2  # todo: cross-validate sample
 
 MODELS = [
     sklearn.linear_model.LogisticRegression(max_iter=10000),

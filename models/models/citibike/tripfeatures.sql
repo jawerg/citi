@@ -37,6 +37,7 @@ select
 from {{ ref('tripdata') }}
 where is_subscriber is not null
   and not contains(s3_object_name, 'JC') -- Exclude JC Files for consistency.
+  and trip_distance_in_km > 0.2 -- ignore trips that have not been "really" started.
 
 -- Sort outputs by broad categories to improve compression of output file
 order by
